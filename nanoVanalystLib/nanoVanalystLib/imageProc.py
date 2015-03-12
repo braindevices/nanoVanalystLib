@@ -270,3 +270,4 @@ def analyzePoresInDir(imgDir, imgPattern = "*.tif", resultDir = os.path.join(TMP
         
         parameterStr = "\n\n".join(parameters)
         np.savetxt(csvFile, areas, delimiter = ",", header = "Area in pixels", footer = parameterStr, comments = '# ')
+    return areas
