@@ -6,12 +6,10 @@ Created on Mar 12, 2015-1:08:22 PM
 '''
 import cv2, os
 import numpy as np
-from LWpyUtils.generalUtils import getNowUTCtimestamp, setEnviron, getLocTMP
+from LWpyUtils.generalUtils import getNowUTCtimestamp, setEnviron
 from scipy import stats
 from Constants_and_Parameters import *
-from imgFileUtils import *
-
-TMPDIR = getLocTMP()
+from imgFileUtils import activeLogFile, appendLogText, currentLogFileName, loadAsGray, showImg
 
 
 def composeMaskedGray(gray, mask, flagInv = True, maskCh = 2, maskFactor = 0.7, grayFactor = 1.):
@@ -218,9 +216,10 @@ def runPoreDetection1Img(imgFile, inDir, outDir, detectPore1Kwds = {}, dirForEac
             _imgRGB = cv2.cvtColor(_gray, cv2.COLOR_GRAY2RGB)
     #         print [cnts[_i] for _i in _idxs0a]
             cv2.drawContours(_imgRGB, [cnts[_i] for _i in _idxs0a], -1, (0,0,255), 2)
-            showImg(_imgRGB, "0Area contours", flagShowImg= True, waitTime=0)\
-            
-        for _i in _idxs0a:
+            showImg(_imgRGB, "0Area contours", flagShowImg= True, waitTime=0)
+        np.sort(_idxs0a)
+        
+        for _i in _idxs0a[::-1]:
             cnts.pop(_i)
         _areas = _areas[_areas >0]
     _logAreas = np.log10(_areas)
