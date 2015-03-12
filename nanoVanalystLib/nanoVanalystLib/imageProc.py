@@ -246,7 +246,7 @@ def analyzePoresInDir(imgDir, imgPattern = "*.tif", resultDir = os.path.join(TMP
     parameters = []
     import glob
     for _f in glob.glob(os.path.join(imgDir, imgPattern)):
-        print _f
+        print "processing file:", _f
         _relativeF =  os.path.relpath(_f, imgDir)
         _areas = runPoreDetection1Img(_relativeF, imgDir, resultDir, **runPoreDetection1ImgKwds)
         areasList.append(_areas)
