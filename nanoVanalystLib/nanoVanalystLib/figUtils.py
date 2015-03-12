@@ -4,6 +4,8 @@ Created on Mar 12, 2015-1:50:06 PM
 
 @author: Ling Wang<LingWangNeuralEng@gmail.com>
 '''
+import os
+from LWpyUtils.generalUtils import getNowUTCtimestamp
 
 def getLim(low, high, ratio):
     _dy = high-low
