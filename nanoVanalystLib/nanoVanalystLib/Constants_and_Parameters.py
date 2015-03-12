@@ -9,3 +9,6 @@ K_PorAnalyzer_LogFile = 'PorAnalyzer_LogFile'
 K_PoreAnalyzer_IMshowWait = "PoreAnalyzer_IMshowWait"
 K_PoreAnalyzer_IMprefix = "PoreAnalyzer_IMprefix"
 K_FLAG_SHOW_IMG = "FLAG_SHOW_IMG"
+
+from LWpyUtils.generalUtils import getLocTMP
+TMPDIR = getLocTMP()

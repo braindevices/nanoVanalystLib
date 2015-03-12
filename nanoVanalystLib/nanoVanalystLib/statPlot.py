@@ -6,12 +6,11 @@ Created on Mar 12, 2015-1:24:32 PM
 '''
 import numpy as np
 from scipy import stats
-import matplotlib.pyplot as plt
-import os
-from LWpyUtils.generalUtils import getNowUTCtimestamp, getLocTMP
+# import matplotlib.pyplot as plt
+# import os
+
 from LWpyUtils import npyUtils
 from LWpyUtils.npyUtils import getGeoMeanMeidanStdMad, getMeanMeidanStdMad
-
 
 def loadCSV(csvFilename, kwargs, logVal = False):
     a = np.genfromtxt(csvFilename, **kwargs)
@@ -172,3 +171,5 @@ def plotGeoStatisticSum(ax, xs, dataList, useMean = False, yerrType= 'std', useM
     _ylow = (_y + _yerror).min()
     _yhigh = (_y - _yerror).min()
     return xs.min(), xs.max(), _ylow, _yhigh
+
+
