@@ -29,6 +29,13 @@ def detectPore1(imgFile, cropY=[0,880], CLAHEkwds = dict(clipLimit=2., tileGridS
     '''
     gsBlurBlockSize, the higher the blur size, the higher possibility to connect parts of big pores. Too high is prone to get false positives.
     autoBinTh_mode_ratio, low is prone to get false negative, high is prone to get false positive.
+    binThType:
+        'percentile', not good idea in normal condition
+        'manual'
+        'modeRatio', default
+    seedWithBlur:
+        except the image is too noisy, turn this off
+        
     
     '''
     
@@ -67,7 +74,6 @@ def detectPore1(imgFile, cropY=[0,880], CLAHEkwds = dict(clipLimit=2., tileGridS
         
     elif binThType == 'percentile':
         _autoBinTh = np.percentile(cl1, autoBinTh_percent)
-        #用percentile效果不好，可能有多个峰值
         
     elif binThType == "manual":
         _autoBinTh = binTh
@@ -77,32 +83,17 @@ def detectPore1(imgFile, cropY=[0,880], CLAHEkwds = dict(clipLimit=2., tileGridS
     if seedWithBlur:
         _seed0 = cl1_blur
     else:
-        #seeding on non-blur image, 效果较好
         _seed0 = cl1
     
     
-    #使用自动binTh之后，tilesize影响不大，tile在4x4的时候似乎效果较好。对unannealling data, 的大pore比较完全，而超小pore的影响不大。
+
     _retval, _seed=cv2.threshold(_seed0, _autoBinTh, 255, cv2.THRESH_BINARY)
     _seed = 255 - _seed # invert the seeds
     kernel_c = np.ones((kernelSize,kernelSize),np.uint8)
     _seed = cv2.morphologyEx(_seed, cv2.MORPH_CLOSE, kernel_c, iterations = MorphOpenItN)
     _comp = composeMaskedGray(gray, _seed, flagInv=False)
     showImg(_comp, "seed_MORPH_CLOSE(k%dx%d_it%d)_comp"%(kernel_c.shape[0],kernel_c.shape[1], MorphOpenItN), True)
-#     _result = cv2.dilate(_seed, kernel_c, iterations = MorphOpenItN*2)
-#     _comp = composeMaskedGray(gray, _result, flagInv=False)
-#     showImg(_comp, "seed_MORPH_CLOSE(k%dx%d_it%d)_dilated_comp"%(kernel_c.shape[0],kernel_c.shape[1], MorphOpenItN), True)
-#     _seed = _result
-    
-    #由于大多数噪声在pore中，因此不需要用open来过滤
-    #即使过滤也不能太改善false positive
-#     kernel_o = np.ones((3,3),np.uint8)
-#     _seed = cv2.morphologyEx(_seed, cv2.MORPH_OPEN, kernel_o, iterations = MorphOpenItN)
-#     _comp = composeMaskedGray(gray, _seed, flagInv=False)
-#     showImg(_comp, "seed_MORPH_CLOSE(k%dx%d_it%d)_MORPH_OPEN(k%dx%d_it%d)_comp"%(kernel_c.shape[0],kernel_c.shape[1], MorphOpenItN, kernel_o.shape[0],kernel_o.shape[1], MorphOpenItN), True)
-    
-    
-    #try to get sure background
-#     kernel_o = np.ones((5,5),np.uint8)
+
     kernel_o = np.ones((5,5),np.uint8)
     
     _retval, _otsu = cv2.threshold(cl1, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -111,14 +102,10 @@ def detectPore1(imgFile, cropY=[0,880], CLAHEkwds = dict(clipLimit=2., tileGridS
     _result = cv2.morphologyEx(_otsu, cv2.MORPH_OPEN, kernel_o, iterations = MorphOpenItN)
     _comp = composeMaskedGray(gray, _result, flagInv=False)
     showImg(_comp, "cl1_blur_otsu_MORPH_OPEN(k%dx%d_it%d)_comp"%( kernel_o.shape[0],kernel_o.shape[1], MorphOpenItN), True)
-#     _result = cv2.erode(_result, kernel_o, iterations = MorphOpenItN*2)
-#     _comp = composeMaskedGray(gray, _result, flagInv=False)
-#     showImg(_comp, "cl1_blur_otsu_MORPH_OPEN(k%dx%d_it%d)_eroded_comp"%( kernel_o.shape[0],kernel_o.shape[1], MorphOpenItN), True)
+
     _sure_bg = _result
     _markerImg=np.zeros(_sure_bg.shape, dtype=np.int32)
-    #indexing 太慢
-#     _markerImg [_sure_bg>0] = 1
-#     _markerImg [_seed>0] = 2
+    
     if poreAsFG:
         _markerImg = _markerImg + _sure_bg/255
         _markerImg = _markerImg + _seed/255*2
@@ -127,10 +114,7 @@ def detectPore1(imgFile, cropY=[0,880], CLAHEkwds = dict(clipLimit=2., tileGridS
         _markerImg = _markerImg + _sure_bg/255*2
         _markerImg = _markerImg + _seed/255
         _postfix = '_poreBG'
-#     _markerImgNormed = _markerImg.astype(np.uint8)
-#     cv2.normalize(_markerImgNormed, _markerImgNormed, 0, 255, cv2.NORM_MINMAX)
-#     _markerImgNormed = cv2.applyColorMap(_markerImgNormed, cv2.COLORMAP_JET)
-    
+        
     if shedOnWhat == "cl1_blur":
     
         _watershedInput = cl1_blur
@@ -150,20 +134,11 @@ def detectPore1(imgFile, cropY=[0,880], CLAHEkwds = dict(clipLimit=2., tileGridS
     
     _watershedInput = cv2.cvtColor(_watershedInput, cv2.COLOR_GRAY2RGB)
     
-#     _result = cv2.morphologyEx(_otsu, cv2.MORPH_CLOSE, kernel_c, iterations = MorphOpenItN)
-#     _result = cv2.morphologyEx(_result, cv2.MORPH_OPEN, kernel_o, iterations = MorphOpenItN)
-#     _result = cv2.dilate()
     
-#     _watershedInput = cv2.cvtColor(_result, cv2.COLOR_GRAY2RGB)
     print "watershed start"
     cv2.watershed(_watershedInput, _markerImg)
     print "watershed end"
-    #double watershed increase the area for big pore, but also too many false positive for super small pores.
-#     print  "start indexing"
-#     _markerImg[_markerImg <=1]=0
-#     _markerImg[_sure_bg>1] = 1
-#     print "indexing end"
-#     cv2.watershed(_watershedInput, _markerImg)
+    
     
     _GrayMarked = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
     
