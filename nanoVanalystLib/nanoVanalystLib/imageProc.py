@@ -9,8 +9,8 @@ import numpy as np
 from LWpyUtils.generalUtils import getNowUTCtimestamp, setEnviron
 from scipy import stats
 from Constants_and_Parameters import *
-from imgFileUtils import activeLogFile, appendLogText, currentLogFileName, loadAsGray, showImg
-
+from imgFileUtils import loadAsGray, showImg
+from logUtils import activeLogFile, appendLogText, currentLogFileName
 
 def composeMaskedGray(gray, mask, flagInv = True, maskCh = 2, maskFactor = 0.7, grayFactor = 1.):
     

@@ -6,11 +6,9 @@ Created on Mar 12, 2015-1:16:18 PM
 '''
 
 import cv2, os
-import numpy as np
-from LWpyUtils.generalUtils import getNowUTCtimestamp, setEnviron, getLocTMP
-from scipy import stats
+
 from Constants_and_Parameters import *
-from logUtils import *
+
 
 def loadAsGray(imgFile, cropY=[0,880]):
     img = cv2.imread(imgFile)
@@ -20,7 +18,8 @@ def loadAsGray(imgFile, cropY=[0,880]):
 
 def showImg(img, windName, write = False, outDir = None, prefix = None, waitTime = None, flagShowImg = None):
     if outDir == None:
-        outDir = os.path.expandvars("${PoreAnalyzer_TMP}")
+        
+        outDir = os.environ[K_PoreAnalyzer_TMP]
     if waitTime == None:
         waitTime = int(os.environ[K_PoreAnalyzer_IMshowWait])
     if prefix == None:
