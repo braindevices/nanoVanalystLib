@@ -31,3 +31,14 @@ def showImg(img, windName, write = False, outDir = None, prefix = None, waitTime
         cv2.waitKey(waitTime)
         cv2.destroyWindow(windName)
     cv2.imwrite(os.path.join(outDir, prefix+ windName+".png"), img)
+
+import numpy as np
+def saveNPZ(structName, structKwds, outDir = None, prefix = None):
+    if outDir == None:
+        
+        outDir = os.environ[K_PoreAnalyzer_TMP]
+    if prefix == None:
+        prefix = os.environ[K_PoreAnalyzer_IMprefix]
+    _npzFile = os.path.join(outDir, prefix+ structName)
+    np.savez_compressed(_npzFile, **structKwds)
+    return _npzFile
