@@ -25,7 +25,7 @@ def showImg(img, windName, write = False, outDir = None, prefix = None, waitTime
     if prefix == None:
         prefix = os.environ[K_PoreAnalyzer_IMprefix]
     if flagShowImg == None:
-        flagSowImg = bool(os.environ[K_FLAG_SHOW_IMG])
+        flagShowImg = bool(os.environ[K_FLAG_SHOW_IMG])
     if flagShowImg:
         cv2.imshow(windName, img)
         cv2.waitKey(waitTime)
