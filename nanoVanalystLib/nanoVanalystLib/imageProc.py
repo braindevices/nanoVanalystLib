@@ -9,7 +9,7 @@ import numpy as np
 from LWpyUtils.generalUtils import getNowUTCtimestamp, setEnviron
 from scipy import stats
 from Constants_and_Parameters import *
-from imgFileUtils import loadAsGray, showImg
+from imgFileUtils import loadAsGray, showImg, saveNPZ
 from logUtils import activeLogFile, appendLogText, currentLogFileName
 
 def composeMaskedGray(gray, mask, flagInv = True, maskCh = 2, maskFactor = 0.7, grayFactor = 1.):
@@ -200,7 +200,10 @@ def runPoreDetection1Img(imgFile, inDir, outDir, detectPore1Kwds = {}, dirForEac
     _logAreas = np.log10(_areas)
     
     appendLogText("{0:} Area: mean = {1:}, median = {2:}, max = {3:}, min = {4:}, geo_mean = {5:} ".format(imgFile, _areas.mean(), np.median(_areas), _areas.max(), _areas.min(), 10**_logAreas.mean()))
-    return _areas
+    #save the contours and hierarchy for future analysis
+    structKwds = dict(areas = _areas, contours = cnts, hierarchy = hierarchys)
+    _npzFile = saveNPZ("detectionResult", structKwds)
+    return _areas, _npzFile
 
 #set the default environ during module init
 setEnviron(PoreAnalyzer_TMP = TMPDIR, PoreAnalyzer_IMshowWait = 0, PoreAnalyzer_IMprefix = "", FLAG_SHOW_IMG = True)
@@ -217,22 +220,25 @@ def analyzePoresInDir(imgDir, imgPattern = "*.tif", resultDir = os.path.join(TMP
     _start = getNowUTCtimestamp("%x")
     areasList = []
     logFiles = []
+    npzFiles = []
     parameters = []
     import glob
     for _f in glob.glob(os.path.join(imgDir, imgPattern)):
         print "processing file:", _f
         _relativeF =  os.path.relpath(_f, imgDir)
-        _areas = runPoreDetection1Img(_relativeF, imgDir, resultDir, **runPoreDetection1ImgKwds)
+        _areas, _npzFile = runPoreDetection1Img(_relativeF, imgDir, resultDir, **runPoreDetection1ImgKwds)
         areasList.append(_areas)
         logFiles.append(currentLogFileName())
+
+        npzFiles.append(os.path.relpath(_npzFile, resultDir))
         
     #concatenate all 
     areas = np.concatenate(tuple(areasList))
     print "areas.shape = ", areas.shape
     _end = getNowUTCtimestamp("%x")
+    csvFile = "%s-%s_areas.csv"%(_start, _end)
+    csvFile = os.path.join(resultDir,csvFile)
     if saveCSV:
-        csvFile = "%s-%s_areas.csv"%(_start, _end)
-        csvFile = os.path.join(resultDir,csvFile)
         
         for _f in logFiles:
             _t = ""
@@ -244,4 +250,10 @@ def analyzePoresInDir(imgDir, imgPattern = "*.tif", resultDir = os.path.join(TMP
         
         parameterStr = "\n\n".join(parameters)
         np.savetxt(csvFile, areas, delimiter = ",", header = "Area in pixels", footer = parameterStr, comments = '# ')
+    npzlistFile = os.path.splitext(csvFile)[0] + '.npzlist'
+    
+    import codecs
+    with codecs.open(npzlistFile, 'wb', 'utf-8') as _hf:
+        _hf.write('\n'.join(npzFiles))
+    
     return areas
