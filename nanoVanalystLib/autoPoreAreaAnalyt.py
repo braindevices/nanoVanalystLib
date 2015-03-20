@@ -14,7 +14,7 @@ from nanoVanalystLib.figures import genFigure_HbinDist_1Stat_1GeoStat
 from nanoVanalystLib.Constants_and_Parameters import TMPDIR
 
 
-def runGenFigs_Hbd1S1G(xs, dataList=[], csvFilename ="", kwargs = dict(delimiter =',', dtype =float, missing_values ={0:''}, filling_values={0:np.nan}, skip_header=1), logY = False, binN = 50):
+def runGenFigs_Hbd1S1G(xs, dataList=[], csvFilename ="", kwargs = dict(delimiter =',', dtype =float, missing_values ={0:''}, filling_values={0:np.nan}, skip_header=1), logY = False, binN = 50, figDir = TMPDIR):
     
     if not dataList:
         dataList = loadCSV(csvFilename, kwargs, logVal =False)
@@ -35,7 +35,7 @@ def runGenFigs_Hbd1S1G(xs, dataList=[], csvFilename ="", kwargs = dict(delimiter
     fig = genFigure_HbinDist_1Stat_1GeoStat(xs, dataList, plotDistsKwds=plotDistsKwds, plotErrbarKwds=plotErrbarKwds, plotGeoErrbarKwds=plotGeoErrbarKwds, sbplotKwds =sbplotKwds, binN= binN)
     config1Axes(fig.axes[0], "Laser power", "Pore Area", "W", "nm", legendOn=True)
     
-    saveFig(fig, figDir=TMPDIR, key1="Laser power", key2="Pore Area")
+    saveFig(fig, figDir=figDir, key1="Laser power", key2="Pore Area")
     
     errorBarKwds = dict(fmt='-g', linewidth = 1, markersize=5, ecolor='g',capsize=4, elinewidth=1, label = "Median&St. Err.")
     plotErrbarKwds = dict(errorBarKwds =errorBarKwds, yerrType= 'ste', useMean =True)
@@ -46,7 +46,7 @@ def runGenFigs_Hbd1S1G(xs, dataList=[], csvFilename ="", kwargs = dict(delimiter
     
     config1Axes(fig.axes[0], "Laser power", "Pore Area", "W", "nm", legendOn=True)
     
-    saveFig(fig, figDir=TMPDIR, key1="Laser power", key2="Pore Area")
+    saveFig(fig, figDir=figDir, key1="Laser power", key2="Pore Area")
     
     errorBarKwds = dict(fmt='-g', linewidth = 1, markersize=5, ecolor='g',capsize=4, elinewidth=1, label = r"Median&Confidence interval (95%)")
     plotErrbarKwds = dict(errorBarKwds =errorBarKwds, yerrType= 'ci', useMean =True)
@@ -56,7 +56,7 @@ def runGenFigs_Hbd1S1G(xs, dataList=[], csvFilename ="", kwargs = dict(delimiter
     fig = genFigure_HbinDist_1Stat_1GeoStat(xs, dataList, plotDistsKwds=plotDistsKwds, plotErrbarKwds=plotErrbarKwds, plotGeoErrbarKwds=plotGeoErrbarKwds, sbplotKwds =sbplotKwds, binN= binN)
     config1Axes(fig.axes[0], "Laser power", "Pore Area", "W", "nm", legendOn=True)
     
-    saveFig(fig, figDir=TMPDIR, key1="Laser power", key2="Pore Area")
+    saveFig(fig, figDir=figDir, key1="Laser power", key2="Pore Area")
     
 def autoPoreAreaAnalyt(xs, imgDirs, imgPatterns, resultDir, saveCSV = False, runPoreDetection1ImgKwds = dict(dirForEachFile = True), binN = 50):
     if not os.path.isdir(resultDir):
@@ -72,7 +72,7 @@ def autoPoreAreaAnalyt(xs, imgDirs, imgPatterns, resultDir, saveCSV = False, run
             os.makedirs(_subResultDir)
         _data = analyzePoresInDir(_imgDir, _imgPattern, _subResultDir, saveCSV, runPoreDetection1ImgKwds)
         dataList.append(_data)
-    runGenFigs_Hbd1S1G(xs, dataList, logY = True, binN=binN)
+    runGenFigs_Hbd1S1G(xs, dataList, logY = True, binN=binN, figDir=resultDir)
     
 if __name__ == '__main__':
     imgDirs=[]
