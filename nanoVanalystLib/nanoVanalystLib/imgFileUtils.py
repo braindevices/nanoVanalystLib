@@ -30,7 +30,9 @@ def showImg(img, windName, write = False, outDir = None, prefix = None, waitTime
         cv2.imshow(windName, img)
         cv2.waitKey(waitTime)
         cv2.destroyWindow(windName)
-    cv2.imwrite(os.path.join(outDir, prefix+ windName+".png"), img)
+    _file = os.path.join(outDir, prefix+ windName+".png")
+    cv2.imwrite(_file, img)
+    return _file
 
 import numpy as np
 def saveNPZ(structName, structKwds, outDir = None, prefix = None):
